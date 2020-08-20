@@ -1,0 +1,92 @@
+pipeline {
+  
+    agent none
+
+    stages {
+      
+        stage('Hacer el login en master') {
+         agent {
+                node {
+                    label 'master'
+                }
+            }
+            steps {
+                echo 'Ejecutando comando docker login con la contraseña'
+                sh 'docker login devopsutec.azurecr.io -u devopsutec -p eYUZB+kRWGt19mj8Lj1RpbmSKnwdtw33'
+           }
+        }
+        
+        stage('Aca hacemos la construccion de las imagenes ne master') {
+            agent {
+                node {
+                    label 'master'
+
+
+                }
+            }
+            steps {
+                echo 'hacemos la construccion de imagenes en master'
+              
+                  dir('worker'){ 
+                    sh 'docker build -t devopsutec.azurecr.io/ctcgrupo-worker-1.0:${BUILD_NUMBER} .'
+                  }
+              
+                
+              
+                dir('result'){ 
+                    sh 'docker build -t devopsutec.azurecr.io/ctcgrupo-result-1.0:${BUILD_NUMBER} .'
+                  }
+
+                dir('vote'){ 
+                    sh 'docker build -t devopsutec.azurecr.io/ctcgrupo-vote-1.0:${BUILD_NUMBER} .'
+                  }
+
+
+
+            }
+        }
+
+        stage('hacemos push de imagenes en master') {
+            agent {
+                node {
+                    label 'master'
+
+
+                }
+            }
+            steps {
+                    echo 'hacemos push de Imagenes en master...'
+                    withDockerRegistry(credentialsId: 'CTC_credencial', url:'https://devopsutec.azurecr.io'){ 
+                        sh 'docker push devopsutec.azurecr.io/ctcgrupo-worker-1.0:${BUILD_NUMBER}'
+                        sh 'docker push devopsutec.azurecr.io/ctcgrupo-vote-1.0:${BUILD_NUMBER}'
+                        sh 'docker push devopsutec.azurecr.io/ctcgrupo-result-1.0:${BUILD_NUMBER}'
+                    }
+                    
+            }
+        }
+
+
+         stage('Deploy con docker-compose en  UTEC') {
+         agent {
+                node {
+                    label 'utec'
+                }
+            }
+            steps {
+            withDockerRegistry(credentialsId: 'CTC_credencial', url:'https://devopsutec.azurecr.io'){ 
+                echo 'Aca hacemos la verificacion previa a realizar docker-compose...'
+                echo 'Corriendo el comando docker ps..'
+                sh 'docker ps'
+                echo 'Corriendo el deploy con docker-compose up -d...'
+                sh 'docker-compose up -d'
+                echo 'Hacer la verificacion posterior a docker-compose...'
+                echo 'Corriendo el comando docker ps...'
+                sh 'docker ps'
+                }
+           }
+        }
+
+      
+    }
+
+        }
