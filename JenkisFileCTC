@@ -11,7 +11,7 @@ pipeline {
                 }
             }
             steps {
-                echo 'Ejecutando comando docker login con la contraseña'
+                echo 'Ejecutando comando docker login con la contraseÃ±a'
                 sh 'docker login devopsutec.azurecr.io -u devopsutec -p eYUZB+kRWGt19mj8Lj1RpbmSKnwdtw33'
            }
         }
@@ -28,17 +28,17 @@ pipeline {
                 echo 'hacemos la construccion de imagenes en master'
               
                   dir('worker'){ 
-                    sh 'docker build -t devopsutec.azurecr.io/ctcgrupo-worker-1.0:${BUILD_NUMBER} .'
+                    sh 'docker build -t devopsutec.azurecr.io/ctc-worker-1.0:${BUILD_NUMBER} .'
                   }
               
                 
               
                 dir('result'){ 
-                    sh 'docker build -t devopsutec.azurecr.io/ctcgrupo-result-1.0:${BUILD_NUMBER} .'
+                    sh 'docker build -t devopsutec.azurecr.io/ctc-result-1.0:${BUILD_NUMBER} .'
                   }
 
                 dir('vote'){ 
-                    sh 'docker build -t devopsutec.azurecr.io/ctcgrupo-vote-1.0:${BUILD_NUMBER} .'
+                    sh 'docker build -t devopsutec.azurecr.io/ctc-vote-1.0:${BUILD_NUMBER} .'
                   }
 
 
@@ -57,9 +57,9 @@ pipeline {
             steps {
                     echo 'hacemos push de Imagenes en master...'
                     withDockerRegistry(credentialsId: 'CTC_credencial', url:'https://devopsutec.azurecr.io'){ 
-                        sh 'docker push devopsutec.azurecr.io/ctcgrupo-worker-1.0:${BUILD_NUMBER}'
-                        sh 'docker push devopsutec.azurecr.io/ctcgrupo-vote-1.0:${BUILD_NUMBER}'
-                        sh 'docker push devopsutec.azurecr.io/ctcgrupo-result-1.0:${BUILD_NUMBER}'
+                        sh 'docker push devopsutec.azurecr.io/ctc-worker-1.0:${BUILD_NUMBER}'
+                        sh 'docker push devopsutec.azurecr.io/ctc-vote-1.0:${BUILD_NUMBER}'
+                        sh 'docker push devopsutec.azurecr.io/ctc-result-1.0:${BUILD_NUMBER}'
                     }
                     
             }
